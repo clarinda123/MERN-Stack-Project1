@@ -5,47 +5,63 @@ metadata:
   namespace: mern
   labels:
     role: backend
+    app: backend
     env: dev
 spec:
   replicas: 1
   selector:
     matchLabels:
       role: backend
+      app: backend
   template:
     metadata:
       labels:
         role: backend
+        app: backend
     spec:
       containers:
-      - name: backend
-        image: avian19/backend:1
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 3500
-        livenessProbe:
-          httpGet:
-            path: backend/
-            port: 3500
-          initialDelaySeconds: 3
-          periodSeconds: 10
-        env:
-        - name: host
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: host
-        - name: user
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: user
-        - name: password
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: password
-        - name: database
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: database
+        - name: backend
+          image: clarinda1/mern-stack-project-backend-image:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3500
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /backend
+              port: 3500
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /backend
+              port: 3500
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          env:
+            - name: host
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: mysql-host
+            - name: user
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: mysql-user
+            - name: database
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: mysql-database
+            - name: password
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: mysql-password

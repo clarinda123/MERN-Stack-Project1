@@ -24,6 +24,11 @@ const db = mysql.createConnection({
     }
 });
 
+// Health check for ALB and uptime monitors
+app.get('/', (req, res) => {
+    res.status(200).send('OK');
+});
+
 // Function to create tables if they do not exist
 const createTables = () => {
     const createStudentTable = `
